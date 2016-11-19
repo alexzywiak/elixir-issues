@@ -1,10 +1,12 @@
 defmodule Issues.CLI do
-  
+  import Issues.TableFormatter, only: [print_table_for_columns: 2]
+  import Issues.GithubIssues, only: [decode_response: 1, convert_to_list_of_maps: 1, sort_into_ascending_order: 1]
   @default_count 4
 
-  def run(argv) do
-    parse_args(argv)
-      |> process
+  def main(argv) do
+    argv  
+    |> parse_args
+    |> process
   end
 
   def parse_args(argv) do
@@ -27,7 +29,12 @@ defmodule Issues.CLI do
     """
   end
 
-  def process({user, project, _count}) do
+  def process({user, project, count}) do
     Issues.GithubIssues.fetch(user, project)
+    |> decode_response
+    |> convert_to_list_of_maps
+    |> sort_into_ascending_order
+    |> Enum.take(count)
+    |> print_table_for_columns(["number", "created_at", "title"])
   end
 end
