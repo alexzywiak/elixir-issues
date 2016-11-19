@@ -25,12 +25,11 @@ defmodule Issues.GithubIssues do
 
   def handle_response({:ok, %{status_code: 200, body: body}}) do 
     Logger.info "Successful Fetch"
-    Logger.info fn -> inspect(body) end
+    Logger.debug fn -> inspect(body) end
     { :ok, :jsx.decode(body) }
   end
-  def handle_response({:ok, %{status_code: _, body: body}}) do
-    Logger.error "Error fetching"
-    { :error, :jsx.decode(body) }
+  def handle_response({:error,  %{reason: reason}}) do
+    Logger.error "Error fetching because: #{reason}"
   end
 
   def issues_url(user, project) do
